@@ -8,9 +8,9 @@ If you would like to contribute, you must follow the DCO process in the attached
 
 * IBM Spectrum LSF bsubmit
 * Supporting LSF Release: 10.1
-* Wrapper Version: 1.0
-* Publication date: 2 Jul 2020
-* Last modified: 2 Jul 2020
+* Version: 1.0
+* Publication date: 29 Jul 2020
+* Last modified: 29 Jul 2020
 
 ## Contents
 
