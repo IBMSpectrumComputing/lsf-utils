@@ -39,10 +39,17 @@ class LSF(BotPlugin):
             if len(outs) > 0:
                 status = outs.decode('utf-8').rstrip()
                 if status == 'DONE' or status == 'EXIT':
+                    del self.jobs[jobid]
+
+                    # for a user in a group, the user name is postfixed at the last `/`
+                    # get the user name and notify the user directly when job is finished
+                    start_pos = username.rfind('/')
+                    if start_pos >= 0:
+                        username = username[start_pos+1:]
+
                     result = 'Notification: job <' + jobid + '> is ' + str(status)
                     self.send(self.build_identifier('@' + username), f'\`\`\`{result}\`\`\`')
 
-                    del self.jobs[jobid]
 
     def activate(self):
         super().activate()
