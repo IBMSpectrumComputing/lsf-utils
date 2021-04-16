@@ -1,0 +1,9 @@
+[Core]
+Name = LSF
+Module = lsf 
+
+[Documentation]
+Description = This is a simple plugin for talking with your LSF cluster
+
+[Python]
+Version = 3+

@@ -1,0 +1,11 @@
+{
+	"administrator" : "admin",
+	"allowlist": [
+		"slack_userA",
+		"slack_userB"
+	],
+	"usermap": [
+		{ "slack_userA": "os_userX"},
+		{ "slack_userB": "os_userY"}
+	]
+}
