@@ -1,0 +1,89 @@
+#!/usr/bin/python3
+
+# Copyright International Business Machines Corp, 2021
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import sys
+import os
+import re
+import logging
+import subprocess
+
+log = None
+
+def set_log(logfile):
+    global log
+
+    filelog = logging.FileHandler(logfile)
+    logformat = logging.Formatter("%(asctime)s %(name)s[%(process)d]: %(message)s")
+    filelog.setFormatter(logformat)
+
+    log = logging.getLogger('lsf-criu-restart')
+    log.setLevel(logging.DEBUG)
+    log.addHandler(filelog)
+
+def log_debug(message):
+    if log is not None :
+        log.debug(message)
+
+def run_it(cmd) :
+    proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    out, err = proc.communicate()
+    if out is not None and out.strip() != '':
+        log_debug(out)
+    if err is not None and err.strip() != '':
+        log_debug(err)
+    proc.wait()
+
+def main(argv):
+    # for debug purpose only
+    set_log("/tmp/lsf-job-" + os.environ['LSB_JOBID'] + ".cr.log")
+
+    log_debug("start restarting ......")
+    log_debug(argv)
+    
+    # get job cgroup from memory sub group
+    cgtop="/sys/fs/cgroup/memory/lsf/" + os.environ['LSF_CGROUP_TOPDIR_KEY']
+    jobcg = "^job\." + os.environ['LSB_JOBID'] + "\..*"
+    jobcgre = re.compile(jobcg)
+    jobcgroup = ""
+    for f in os.listdir(cgtop):
+        if (jobcgre.match(f)):
+            jobcgroup = f
+            break;
+
+    log_debug("job cgroup is <" + jobcgroup + ">")
+
+    cgrp_options = ""
+    if jobcgroup != "":
+        cgrp_path= "/lsf/" + os.environ['LSF_CGROUP_TOPDIR_KEY'] + "/" + jobcgroup + "/"
+        mem_cgrp= "memory:" + cgrp_path
+        frz_cgrp= "freezer:" + cgrp_path
+        cpu_cgrp= "cpu,cpuacct:" + cgrp_path
+        cgrp_options= " --cgroup-root " + mem_cgrp + " --cgroup-root " + frz_cgrp + " --cgroup-root " + cpu_cgrp
+
+    cmd = "LSB_RESTART_CMD=criu restore -D " + os.environ['LSB_CHKPNT_DIR'] + cgrp_options + " --shell-job \n"
+    log_debug(cmd)
+
+    f = open(os.environ['LSB_CHKPNT_DIR'] + "/.restart_cmd", "w")
+    f.write(cmd);
+    f.close();
+
+    log_debug("leaving ...")
+    sys.exit(0);
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
+
