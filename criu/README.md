@@ -4,6 +4,7 @@
 
 To prepare checkpoint environment for [CRIU](https://criu.org/Main_Page),
 echkpnt scripts should be downloaded and copy to your `LSF` environment.
+These scripts depend on Python and [psutil](https://pypi.org/project/psutil/) tool. Please prepare the python environment before checkpointing your job.
 ```
 $ cp echkpnt.criu erestart.criu $LSF_SERVERDIR
 ```
