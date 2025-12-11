@@ -29,6 +29,11 @@
 #include <sstream>
 #include <vector>
 
+#include <sys/wait.h>
+
+#define WAIT_TIME 2
+#define NTRIES 30
+
 
 const bool BSUB_DEBUG = false;
 
@@ -308,16 +313,38 @@ int changeUser(char * execUser)
     }
     uid_t execuid = execpsw->pw_uid;
 
-    std::string clustername = getClusterName();
-    if (clustername.empty()) {
-        //std::cout << "Cannot get LSF cluster name" << std::endl;
-        return -1;
+    std::string clustername;
+    int lcv = 0;
+    while(lcv <= NTRIES) {
+        lcv++;
+        clustername = getClusterName();
+        if (clustername.empty()) {
+            std::cout << "Cannot get LSF cluster name" << std::endl;
+            if (lcv >= NTRIES) {
+                return -1;
+            }
+            sleep(WAIT_TIME);
+        }
+        else {
+            break;
+        }
     }
 
-    std::vector<uid_t> admins = getClusterAdmin(clustername);
-    if (admins.size() < 1) {
-        //std::cout << "Cannot get cluster admins" << std::endl;
-        return -1;
+    std::vector<uid_t> admins;
+    lcv = 0;
+    while(lcv <= NTRIES) {
+        lcv++;
+        admins = getClusterAdmin(clustername);
+        if (admins.size() < 1) {
+            std::cout << "Cannot get cluster admins" << std::endl;
+            if (lcv >= NTRIES) {
+                return -1;
+            }
+            sleep(WAIT_TIME);
+        }
+        else {
+            break;
+        }
     }
 
     std::string mappingfile = getMappingFilePath();
