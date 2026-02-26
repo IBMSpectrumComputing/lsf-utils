@@ -279,18 +279,23 @@ bool verifyUserMapping(std::string fpath, std::string execName)
 }
 
 
-void runcmd(std::string cmd)
+int runcmd(std::string cmd)
 {
     std::string readline;
     FILE * fp = popen(cmd.c_str(), "r");
-    if (fp != NULL) {
-        char buffer[4096];
-        while(fgets(buffer, sizeof(buffer) - 1, fp) != NULL) {
-            std::cout << buffer;
-        }
+    if (!fp) {
+        throw std::runtime_error("popen() failed!");
     }
-
-    pclose(fp);
+    char buffer[4096];
+    while(fgets(buffer, sizeof(buffer) - 1, fp) != NULL) {
+        std::cout << buffer;
+    }
+    // pclose returns the termination status of the command
+    int status = pclose(fp);
+    // Extract the exit code from the status
+    // WEXITSTATUS is a macro that gets the actual return value (0-255)
+    int exit_code = WEXITSTATUS(status);
+    return exit_code;
 }
 
 int changeUser(char * execUser)
@@ -376,7 +381,7 @@ int main(int argc, char **argv)
         bsubcmd.append(" ");
         bsubcmd.append(argv[i]);
     }
-    runcmd(bsubcmd);
+    int exit_code = runcmd(bsubcmd);
 
-    return 0;
+    return exit_code;
 }
