@@ -3,6 +3,9 @@
 - [bsubmit](https://github.com/IBMSpectrumComputing/lsf-utils/tree/master/bsubmit)  
 A setuid tool to submit LSF jobs on behalf of other users.
 
+- [bsubkill](https://github.com/IBMSpectrumComputing/lsf-utils/tree/master/bsubkill)  
+A setuid tool to kill other users' LSF jobs.
+
 - [LSF chatops](https://github.com/IBMSpectrumComputing/lsf-utils/tree/master/chatops/errbot)  
 An `Errbot` plugin to help you talking with your `LSF` cluster by `Slack` from anywhere.
 
